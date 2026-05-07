@@ -2,7 +2,7 @@
 
 A simple web tool that helps translators check their work when the text contains **placeholders** — special markers that get replaced with a file name, a number, or a word depending on a particular situation.
 
-🔗 **[Open the tool](https://securefolderfs-community.github.io/LocalizationTester/)**
+🔗 **[Open the tool](https://securefolderfs-community.github.io/LocalizationPlayground/)**
 
 ---
 
