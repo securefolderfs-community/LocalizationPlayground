@@ -5,7 +5,6 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
-    <PublishDir>docs/</PublishDir>
   </PropertyGroup>
 
   <ItemGroup>
