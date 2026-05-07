@@ -1,0 +1,403 @@
+@page "/"
+@using System.Text.RegularExpressions
+@using SmartFormat
+
+<PageTitle>SecureFolderFS Translation Tester</PageTitle>
+
+<div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
+
+    <!-- Format Strings Row -->
+    <div style="display: flex; gap: 16px;">
+        <div style="flex: 1; background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px;">
+            <h2 style="margin: 0 0 12px 0;">Original</h2>
+            <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px;">Format
+                Text:</label>
+            <textarea
+                value="@originalFormatString"
+                @oninput="@(e => OnOriginalFormatStringChanged(e.Value?.ToString() ?? string.Empty))"
+                style="width: 100%; height: 100px; font-family: monospace; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;"
+            ></textarea>
+        </div>
+
+        <div style="flex: 1; background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px;">
+            <h2 style="margin: 0 0 12px 0;">Translation</h2>
+            <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px;">Format
+                Text:</label>
+            <textarea
+                value="@translationFormatString"
+                @oninput="@(e => OnTranslationFormatStringChanged(e.Value?.ToString() ?? string.Empty))"
+                style="width: 100%; height: 100px; font-family: monospace; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;"
+            ></textarea>
+        </div>
+    </div>
+
+    <!-- Shared Parameters -->
+    <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="margin: 0;">Parameters</h3>
+            <button
+                @onclick="ShowAddParameterDialog"
+                style="padding: 5px 12px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;">
+                + Add Parameter
+            </button>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+            @foreach (var param in parameters)
+            {
+                <div style="flex: 1; min-width: 160px; max-width: 240px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <label style="margin: 0; font-family: monospace; font-size: 13px;">@param.Key</label>
+                        <select
+                            value="@(param.Value.IsNumeric ? "number" : "string")"
+                            @onchange="@(e => ChangeParameterType(param.Key, e.Value?.ToString() ?? "string"))"
+                            style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px; background: white; font-size: 12px;">
+                            <option value="string">Text</option>
+                            <option value="number">Number</option>
+                        </select>
+                        <button
+                            @onclick="@(() => RemoveParameter(param.Key))"
+                            style="padding: 2px 6px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">
+                            ✕
+                        </button>
+                    </div>
+                    @if (param.Value.IsNumeric)
+                    {
+                        <input
+                            type="number"
+                            value="@GetParameterValue(param.Key)"
+                            @oninput="@(e => UpdateParameterValue(param.Key, e.Value?.ToString() ?? string.Empty, true))"
+                            style="width: 100%; padding: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;"
+                        />
+                    }
+                    else
+                    {
+                        <input
+                            type="text"
+                            value="@GetParameterValue(param.Key)"
+                            @oninput="@(e => UpdateParameterValue(param.Key, e.Value?.ToString() ?? string.Empty, false))"
+                            style="width: 100%; padding: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;"
+                        />
+                    }
+                </div>
+            }
+        </div>
+
+        @if (showAddParameterDialog)
+        {
+            <div
+                style="margin-top: 15px; padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
+                <h4 style="margin-top: 0;">Add New Parameter</h4>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 3px;">Parameter Name:</label>
+                    <input
+                        type="text"
+                        @bind="newParameterName"
+                        @bind:event="oninput"
+                        placeholder="e.g., count, name, etc."
+                        style="width: 100%; padding: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 3px;"
+                    />
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 3px;">Type:</label>
+                    <select
+                        @bind="newParameterType"
+                        style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
+                        <option value="string">Text</option>
+                        <option value="number">Number</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button
+                        @onclick="AddParameter"
+                        style="padding: 5px 15px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                        Add
+                    </button>
+                    <button
+                        @onclick="CancelAddParameter"
+                        style="padding: 5px 15px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Previews Row -->
+    <div style="display: flex; gap: 16px;">
+        <div style="flex: 1; background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px;">
+            <h3 style="margin: 0 0 10px 0;">Original Preview</h3>
+            <div
+                style="padding: 10px; background: #f5f5f5; border-radius: 3px; font-family: monospace; min-height: 40px; @(originalError != null ? "color: red;" : string.Empty)">
+                @if (originalError != null)
+                {
+                    @originalError
+                }
+                else
+                {
+                    @originalOutput
+                }
+            </div>
+        </div>
+
+        <div style="flex: 1; background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px;">
+            <h3 style="margin: 0 0 10px 0;">Translation Preview</h3>
+            <div
+                style="padding: 10px; background: #f5f5f5; border-radius: 3px; font-family: monospace; min-height: 40px; @(translationError != null ? "color: red;" : string.Empty)">
+                @if (translationError != null)
+                {
+                    @translationError
+                }
+                else
+                {
+                    @translationOutput
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private string originalFormatString = "Text: {0:plural:{} item (one)|{} items (some)|{} items (none or more)}";
+    private string translationFormatString = string.Empty;
+
+    private Dictionary<string, ParameterInfo> parameters = new();
+    private Dictionary<string, object> parameterValues = new();
+
+    private string? originalOutput;
+    private string? originalError;
+    private string? translationOutput;
+    private string? translationError;
+
+    private bool showAddParameterDialog;
+    private string newParameterName = string.Empty;
+    private string newParameterType = "string";
+
+    protected override void OnInitialized()
+    {
+        ExtractParameters();
+        UpdatePreviews();
+    }
+
+    private void ShowAddParameterDialog()
+    {
+        showAddParameterDialog = true;
+        newParameterName = string.Empty;
+        newParameterType = "string";
+    }
+
+    private void CancelAddParameter()
+    {
+        showAddParameterDialog = false;
+        newParameterName = string.Empty;
+        newParameterType = "string";
+    }
+
+    private void AddParameter()
+    {
+        if (string.IsNullOrWhiteSpace(newParameterName))
+        {
+            return;
+        }
+
+        // Clean the parameter name (remove invalid characters)
+        var cleanName = new string(newParameterName.Where(c => char.IsLetterOrDigit(c) || c == '_').ToArray());
+
+        if (string.IsNullOrWhiteSpace(cleanName))
+        {
+            return;
+        }
+
+        // Check if parameter already exists
+        if (parameters.ContainsKey(cleanName))
+        {
+            return;
+        }
+
+        // Add the parameter
+        bool isNumeric = newParameterType == "number";
+        parameters[cleanName] = new ParameterInfo
+        {
+            IsNumeric = isNumeric,
+            UserOverride = true
+        };
+
+        // Set default value
+        parameterValues[cleanName] = isNumeric ? 0 : string.Empty;
+
+        // Close dialog
+        showAddParameterDialog = false;
+        newParameterName = string.Empty;
+        newParameterType = "string";
+
+        UpdatePreviews();
+    }
+
+    private void RemoveParameter(string key)
+    {
+        parameters.Remove(key);
+        parameterValues.Remove(key);
+        UpdatePreviews();
+    }
+
+    private void OnOriginalFormatStringChanged(string value)
+    {
+        originalFormatString = value;
+        ExtractParameters();
+        UpdatePreviews();
+    }
+
+    private void OnTranslationFormatStringChanged(string value)
+    {
+        translationFormatString = value;
+        UpdatePreviews();
+    }
+
+    private void ExtractParameters()
+    {
+        // Use simpler regex to catch all placeholders, including nested ones
+        var regex = new Regex(@"\{(\w+)");
+        var uniqueNames = new HashSet<string>();
+
+        // Extract from original format string
+        var matches = regex.Matches(originalFormatString);
+        foreach (Match match in matches)
+        {
+            uniqueNames.Add(match.Groups[1].Value);
+        }
+
+        // Rebuild parameters dictionary
+        var newParameters = new Dictionary<string, ParameterInfo>();
+
+        foreach (var name in uniqueNames)
+        {
+            // Determine if parameter should be numeric (best guess)
+            bool isNumeric = originalFormatString.Contains($"{{{name}:choose(") ||
+                             originalFormatString.Contains($"{{{name}:plural") ||
+                             originalFormatString.Contains($"{{{name}:cond:");
+
+            // Check if we already have this parameter with user preference
+            if (parameters.TryGetValue(name, out var existingParam) && existingParam.UserOverride)
+            {
+                // Keep user's choice
+                newParameters[name] = existingParam;
+            }
+            else
+            {
+                // Use auto-detected type
+                newParameters[name] = new ParameterInfo
+                {
+                    IsNumeric = isNumeric,
+                    UserOverride = false
+                };
+            }
+
+            var currentIsNumeric = newParameters[name].IsNumeric;
+
+            // Preserve existing values or set defaults
+            if (parameterValues.ContainsKey(name))
+            {
+                // Keep existing value, but convert type if needed
+                var existingValue = parameterValues[name];
+                if (currentIsNumeric && existingValue is string strValue)
+                {
+                    parameterValues[name] = int.TryParse(strValue, out int intVal) ? intVal : 0;
+                }
+                else if (!currentIsNumeric && existingValue is int intValue)
+                {
+                    parameterValues[name] = intValue.ToString();
+                }
+            }
+            else
+            {
+                // Set default value
+                parameterValues[name] = currentIsNumeric ? 0 : string.Empty;
+            }
+        }
+
+        parameters = newParameters;
+    }
+
+    private string GetParameterValue(string key)
+    {
+        if (parameterValues.TryGetValue(key, out var value))
+            return value.ToString() ?? string.Empty;
+
+        return string.Empty;
+    }
+
+    private void UpdateParameterValue(string key, string value, bool isNumeric)
+    {
+        if (isNumeric)
+        {
+            parameterValues[key] = int.TryParse(value, out int intVal) ? intVal : 0;
+        }
+        else
+        {
+            parameterValues[key] = value;
+        }
+
+        UpdatePreviews();
+    }
+
+    private void UpdatePreviews()
+    {
+        // Update original preview
+        try
+        {
+            originalOutput = Smart.Format(originalFormatString, parameterValues);
+            originalError = null;
+        }
+        catch (Exception ex)
+        {
+            originalOutput = null;
+            originalError = ex.Message;
+        }
+
+        // Update translation preview
+        try
+        {
+            translationOutput = Smart.Format(translationFormatString, parameterValues);
+            translationError = null;
+        }
+        catch (Exception ex)
+        {
+            translationOutput = null;
+            translationError = ex.Message;
+        }
+    }
+
+    private void ChangeParameterType(string key, string newType)
+    {
+        bool isNumeric = newType == "number";
+
+        if (parameters.TryGetValue(key, out var param))
+        {
+            param.IsNumeric = isNumeric;
+            param.UserOverride = true;
+
+            // Convert existing value
+            if (parameterValues.TryGetValue(key, out var existingValue))
+            {
+                if (isNumeric && existingValue is string strValue)
+                {
+                    parameterValues[key] = int.TryParse(strValue, out int intVal) ? intVal : 0;
+                }
+                else if (!isNumeric && existingValue is int intValue)
+                {
+                    parameterValues[key] = intValue.ToString();
+                }
+            }
+
+            UpdatePreviews();
+        }
+    }
+
+    private class ParameterInfo
+    {
+        public bool IsNumeric { get; set; }
+        public bool UserOverride { get; set; }
+    }
+
+}
