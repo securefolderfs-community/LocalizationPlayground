@@ -1,5 +1,33 @@
+:root {
+    color-scheme: light dark;
+
+    --lp-bg: #f0f0f0;
+    --lp-card-bg: #ffffff;
+    --lp-card-border: #e0e0e0;
+    --lp-preview-bg: #f5f5f5;
+    --lp-dialog-bg: #f8f9fa;
+    --lp-dialog-border: #dee2e6;
+    --lp-input-border: #cccccc;
+    --lp-text: #212529;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --lp-bg: #121212;
+        --lp-card-bg: #1e1e1e;
+        --lp-card-border: #333333;
+        --lp-preview-bg: #2a2a2a;
+        --lp-dialog-bg: #252525;
+        --lp-dialog-border: #3d3d3d;
+        --lp-input-border: #4a4a4a;
+        --lp-text: #e0e0e0;
+    }
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: var(--lp-bg);
+    color: var(--lp-text);
 }
 
 h1:focus {
