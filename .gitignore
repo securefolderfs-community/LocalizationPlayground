@@ -374,5 +374,5 @@ src/Platforms/SecureFolderFS.Uno/settings/
 # MacOS
 .DS_Store
 
-# LocalizationTester - GitHub Pages build output
+# LocalizationPlayground - GitHub Pages build output
 docs/
