@@ -159,7 +159,7 @@
 </div>
 
 @code {
-    private string originalFormatString = "Text: {0:plural:{} item (one)|{} items (some)|{} items (none or more)}";
+    private string originalFormatString = "Copying {Total:choose(0):{Achieved} {Achieved:plural:item|items|items}|{Total:choose(1):{State}|{Achieved}/{Total} {Total:plural:item|items|items}}}";
     private string translationFormatString = string.Empty;
 
     private Dictionary<string, ParameterInfo> parameters = new();
