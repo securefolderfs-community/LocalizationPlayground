@@ -46,20 +46,22 @@
             @foreach (var param in parameters)
             {
                 <div style="flex: 1; min-width: 160px; max-width: 240px;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px;">
                         <label style="margin: 0; font-family: monospace; font-size: 13px;">@param.Key</label>
-                        <select
-                            value="@(param.Value.IsNumeric ? "number" : "string")"
-                            @onchange="@(e => ChangeParameterType(param.Key, e.Value?.ToString() ?? "string"))"
-                            style="padding: 2px 4px; border: 1px solid var(--lp-input-border); border-radius: 3px; background: var(--lp-card-bg); color: var(--lp-text); font-size: 12px;">
-                            <option value="string">Text</option>
-                            <option value="number">Number</option>
-                        </select>
-                        <button
-                            @onclick="@(() => RemoveParameter(param.Key))"
-                            style="padding: 2px 6px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">
-                            ✕
-                        </button>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <select
+                                value="@(param.Value.IsNumeric ? "number" : "string")"
+                                @onchange="@(e => ChangeParameterType(param.Key, e.Value?.ToString() ?? "string"))"
+                                style="padding: 2px 4px; border: 1px solid var(--lp-input-border); border-radius: 3px; background: var(--lp-card-bg); color: var(--lp-text); font-size: 12px;">
+                                <option value="string">Text</option>
+                                <option value="number">Number</option>
+                            </select>
+                            <button
+                                @onclick="@(() => RemoveParameter(param.Key))"
+                                style="padding: 2px 6px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">
+                                ✕
+                            </button>
+                        </div>
                     </div>
                     @if (param.Value.IsNumeric)
                     {

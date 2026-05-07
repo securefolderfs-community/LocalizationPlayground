@@ -16,11 +16,13 @@
 
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <div class="loading-container">
+            <img src="app_icon.png" alt="App Icon" class="loading-icon" />
+            <div class="loading-bar-track">
+                <div class="loading-bar-fill"></div>
+            </div>
+            <div class="loading-progress-text"></div>
+        </div>
     </div>
 
     <div id="blazor-error-ui">
