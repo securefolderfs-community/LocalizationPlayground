@@ -28,7 +28,7 @@ Copy the string from the translation file and paste it into the **Original** box
 
 Type or paste your translated version into the **Translation** box on the right. Try to keep the `{placeholders}` exactly as they appear in the original — only translate the surrounding words.
 
-> ![TIP]
+> [!TIP]
 > It's often easier to copy the original string and translate it from there.
 
 **3. Fill in the parameters**
@@ -60,7 +60,7 @@ While intimidating at first, the logic is straightforward:
 
 Try changing the values in the Parameters section and watch the previews update in real-time.
 
-> ![NOTE]
+> [!NOTE]
 > In this case, the 'State' is a universal parameter that represents the file name.
 
 ---
